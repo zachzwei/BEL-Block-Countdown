@@ -10,13 +10,18 @@
     <div id="countdown">Loading block height...</div>
 
     <script>
-        const targetBlockHeight = 188000; // Set your target block height
-
         async function fetchBlockHeight() {
             try {
                 const response = await fetch('http://213.199.44.225:3000/blockheight');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 const data = await response.json();
+                if (!data.blockHeight) {
+                    throw new Error('Block height not found in response');
+                }
                 const currentBlockHeight = data.blockHeight;
+                const targetBlockHeight = 1500000; // Set your target block height
                 const blocksRemaining = targetBlockHeight - currentBlockHeight;
 
                 if (blocksRemaining <= 0) {
