@@ -8,7 +8,7 @@ const rpcUser = 'z4ch';
 const rpcPassword = 'bell3000';
 
 // Serve static files (like the logo) from the current directory
-app.use(express.static(path.join(__dirname)));
+app.use('/bellcountdown', express.static(path.join('/var/www/')));
 
 // Define an array of target block heights and their descriptions
 const targets = [
@@ -93,8 +93,8 @@ app.get('/blockcountdown', async (req, res) => {
         </style>
       </head>
       <body>
-        <button class="toggle-button" onclick="toggleDarkMode()">🌙</button>
-        <img src="bellscoin-logo.png" alt="Bellscoin Logo" style="width: 150px; height: auto; margin-bottom: 20px;"/>
+        <button class="toggle-button" onclick="toggleDarkMode()">ðŸŒ™</button>
+        <img src="/bellcountdown/bellscoin-logo.png" alt="Bellscoin Logo" style="width: 150px; height: auto; margin-bottom: 20px;"/>
         <h1>Bellscoin Upcoming Milestones</h1>
         <p style="font-size: 1.5em; font-weight: bold; color: #FF4500;">Current Block Height: ${currentBlockHeight}</p>
     `;
@@ -128,7 +128,7 @@ app.get('/blockcountdown', async (req, res) => {
           <p><strong style="color: ${target.color};">Target Block Height:</strong> ${target.targetBlockHeight}</p>
           <p><strong style="color: ${target.color};">Blocks Remaining:</strong> ${blocksRemaining}</p>
           ${progressBar}
-          <p style="color: ${target.color};">Time remaining: ${days} days, ${hours} hours, ${minutes} seconds</p>
+          <p style="color: ${target.color};">Time remaining: ${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds</p>
           <p style="color: ${target.color};">Estimated activation date: ${endDateString}</p>
         `;
       }
@@ -137,6 +137,10 @@ app.get('/blockcountdown', async (req, res) => {
     output += `
         <div style="margin-top: 20px;">
           <p style="font-size: 1.2em;">Created by: <a href="https://x.com/ZachZwei" target="_blank" style="color: #1E90FF;">z4ch</a></p>
+        </div>
+        <div style="text-align: center; margin-top: 40px; padding: 20px; border-top: 1px solid #ccc;">
+          <p>Taproot will make Bellscoin's smart contract features more compact, potentially more private, and in some cases a bit more flexible.</p>
+          <p>The Epoch 4 and Epoch 5 on Bellscoin represents the reduction of block rewards. There will be a 90% reduction at the start of Epoch 4 and a final reduction on Epoch 5 where the block rewards will go down to only 2 $BEL per minute.</p>
         </div>
         <script>
           function toggleDarkMode() {
