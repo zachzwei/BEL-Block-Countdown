@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bellscoin Block Countdown</title>
+  <link rel="icon" href="/bellcountdown/favicon.ico" type="image/x-icon">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding-top: 20px;
+      transition: background-color 0.5s, color 0.5s;
+    }
+    .dark-mode {
+      background-color: #121212;
+      color: #ffffff;
+    }
+    .toggle-button {
+      cursor: pointer;
+      background-color: #1E90FF;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 50%;
+      font-size: 1em;
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      transition: background-color 0.5s, color 0.5s;
+    }
+    .toggle-button:hover {
+      background-color: #555;
+    }
+    .progress-bar-container {
+      background-color: #f3f3f3;
+      border-radius: 10px;
+      margin: 10px auto;
+      width: 30%;
+      height: 10px;
+      display: inline-block;
+    }
+    .progress-bar {
+      height: 100%;
+      border-radius: 10px;
+      transition: width 0.5s;
+    }
+    .dark-mode .progress-bar-container {
+      background-color: #333;
+    }
+    .refresh-message {
+      margin-top: 10px;
+      font-size: 1em;
+      color: #FF4500;
+    }
+    .copy-button {
+      background-color: #1E90FF;
+      color: white;
+      border: none;
+      padding: 5px;
+      margin-left: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <button class="toggle-button" onclick="toggleDarkMode()">🌙</button>
+  <img src="bellscoin-logo.png" alt="Bellscoin Logo" style="width: 150px; height: auto; margin-bottom: 20px; cursor: pointer;" onclick="refreshPage()"/>
+  <p class="refresh-message">Hit the Bell to Refresh</p>
+  <h1>Bellscoin Upcoming Milestones</h1>
+  <p id="currentBlockHeight" style="font-size: 1.5em; font-weight: bold; color: #FF4500;">Current Block Height: Loading...</p>
+  
+  <!-- Milestone sections will be inserted here by JavaScript -->
+  <div id="milestones"></div>
+
+  <div style="text-align: center; margin-top: 40px; padding: 20px; border-top: 1px solid #ccc;">
+    <p>Taproot will make Bellscoin's smart contract features more compact, potentially more private, and in some cases a bit more flexible.</p>
+    <p>The Epoch 4 and Epoch 5 on Bellscoin represent the reduction of block rewards. There will be a 90% reduction at the start of Epoch 4 and a final reduction on Epoch 5 where the block rewards will go down to only 2 $BEL per minute.</p>
+    <p>Stay <a href="https://node.z4ch.xyz/bellish" target="_blank" style="color: #1E90FF;">Bellish</a>!</p>
+
+    <p>Created by: <a href="https://x.com/ZachZwei" target="_blank" style="color: #1E90FF;">z4ch</a></p>
+    <p>Source: <a href="https://github.com/zachzwei/BEL-Block-Countdown" target="_blank" style="color: #1E90FF;">github</a></p>
+  </div>
+
+  <script>
+    const targets = [
+      { name: 'Taproot Activation', targetBlockHeight: 188000, color: '#1E90FF' },
+      { name: 'Epoch 4', targetBlockHeight: 259201, color: '#32CD32' },
+      { name: 'Epoch 5', targetBlockHeight: 518401, color: '#FF6347' }
+    ];
+
+    async function fetchBlockData() {
+      try {
+        const response = await fetch('http://213.199.44.225:4000/blockheight'); // Replace with your actual server URL
+        if (!response.ok) {
+          throw new Error('Network response was not ok: ' + response.statusText);
+        }
+
+        const data = await response.json();  // Parse the response as JSON
+        console.log('Fetched Block Height:', data.blockHeight);  // Log the fetched block height
+
+        // Insert the block height into the HTML
+        document.getElementById('currentBlockHeight').textContent = `Current Block Height: ${data.blockHeight}`;
+
+        // Update milestones based on the block height
+        updateMilestones(data.blockHeight);
+      } catch (error) {
+        console.error('Error fetching block height:', error);
+        document.getElementById('currentBlockHeight').textContent = 'Error loading block height';
+      }
+    }
+
+    function updateMilestones(currentBlockHeight) {
+      const milestonesContainer = document.getElementById('milestones');
+      milestonesContainer.innerHTML = ''; // Clear existing milestones
+
+      targets.forEach(target => {
+        const blocksRemaining = target.targetBlockHeight - currentBlockHeight;
+        const progressPercentage = Math.min((currentBlockHeight / target.targetBlockHeight) * 100, 100);
+
+        let progressBar = `
+          <div class="progress-bar-container">
+            <div class="progress-bar" style="background-color: ${target.color}; width: ${progressPercentage}%"></div>
+          </div>
+        `;
+
+        if (blocksRemaining <= 0) {
+          milestonesContainer.innerHTML += `<h2 style="color: ${target.color};">${target.name}</h2><p>The target block height has been reached!</p>`;
+        } else {
+          const estimatedTimeRemaining = blocksRemaining * 60; // Assuming average block time is 60 seconds
+          const days = Math.floor(estimatedTimeRemaining / (60 * 60 * 24));
+          const hours = Math.floor((estimatedTimeRemaining % (60 * 60 * 24)) / (60 * 60));
+          const minutes = Math.floor((estimatedTimeRemaining % (60 * 60)) / 60);
+          const seconds = estimatedTimeRemaining % 60;
+
+          const estimatedEndDate = new Date();
+          estimatedEndDate.setSeconds(estimatedEndDate.getSeconds() + estimatedTimeRemaining);
+          const endDateString = estimatedEndDate.toLocaleString(); // Localized date and time format
+
+          milestonesContainer.innerHTML += `
+            <h2 style="color: ${target.color};">${target.name}</h2>
+            <p><strong style="color: ${target.color};">Target Block Height:</strong> ${target.targetBlockHeight}</p>
+            <p><strong style="color: ${target.color};">Blocks Remaining:</strong> ${blocksRemaining}</p>
+            ${progressBar}
+            <p style="color: ${target.color};">Time remaining: ${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds</p>
+            <p style="color: ${target.color};">Estimated activation date: ${endDateString}</p>
+          `;
+        }
+      });
+    }
+
+    // Fetch block data when the page loads
+    fetchBlockData();
+
+    // Toggle dark mode
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+      localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+    }
+
+    // Copy cryptocurrency addresses to clipboard
+    function copyToClipboard(id) {
+      const textElement = document.getElementById(id);
+      const text = textElement.textContent || textElement.innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Address copied to clipboard!');
+      }).catch(err => {
+        console.error('Failed to copy: ', err);
+      });
+    }
+
+    // Refresh the page when the logo is clicked
+    function refreshPage() {
+      location.reload();
+    }
+
+    // Load the user's preferred theme from localStorage or default to system preference
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme) {
+        document.body.classList.toggle('dark-mode', savedTheme === 'dark');
+      } else {
+        const prefersDarkScheme = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        document.body.classList.toggle('dark-mode', prefersDarkScheme);
+      }
+    });
+  </script>
+</body>
+</html>
